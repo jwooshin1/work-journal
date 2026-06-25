@@ -35,7 +35,7 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 
 /* ── 내보내기 유틸 ── */
 function exportToCSV(entries) {
-  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "메모", "마지막수정"];
+  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "작업내용", "마지막수정"];
   const rows = entries.map(e => [
     e.noticeId, e.category, e.date, e.time, e.creator,
     e.content, e.status, e.memo || "",
@@ -166,7 +166,7 @@ function ImportModal({ currentEntries, onImport, onClose }) {
           const lines = ev.target.result.replace(/^\uFEFF/, "").split("\n").filter(Boolean);
           const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, "").trim());
           const COL = { "통지번호":"noticeId","유형":"category","생성일":"date","생성시간":"time",
-            "생성자":"creator","통지내용":"content","상태":"status","메모":"memo" };
+            "생성자":"creator","통지내용":"content","상태":"status","작업내용":"memo" };
           parsed = lines.slice(1).map(line => {
             const vals = [];
             let cur = "", inQ = false;
@@ -481,12 +481,12 @@ function EntryModal({ entry, onSave, onClose }) {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>메모 (선택)</label>
+                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>작업내용</label>
                 <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.memo}
-                  onChange={e => set("memo", e.target.value)} placeholder="추가 메모를 입력하세요" />
+                  onChange={e => set("memo", e.target.value)} placeholder="추가 작업내용을 입력하세요" />
               </div>
               <div>
-                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>제품구매 (선택)</label>
+                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>제품구매</label>
                 <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.purchase}
                   onChange={e => set("purchase", e.target.value)} placeholder="구매 제품명, 수량, 비용 등을 입력하세요" />
               </div>
@@ -509,7 +509,7 @@ function DetailModal({ entry, onEdit, onDelete, onClose }) {
     ["생성일시", `${entry.date} ${entry.time}`],
     ["생성자", entry.creator],
     ["통지내용", entry.content],
-    ["메모", entry.memo],
+    ["작업내용", entry.memo],
     ["제품구매", entry.purchase],
   ].filter(([, v]) => v);
   return (

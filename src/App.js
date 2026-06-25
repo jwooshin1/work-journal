@@ -486,6 +486,7 @@ function EntryModal({ entry, onSave, onClose }) {
                 <textarea style={{ ...field, marginTop:6, minHeight:100, resize:"vertical" }} value={form.memo}
                   onChange={e => set("memo", e.target.value)} placeholder="추가 작업내용를 입력하세요" />
               </div>
+             </div>
               <div>
                 <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>제품구매</label>
                 <textarea style={{ ...field, marginTop:6, minHeight:80, resize:"vertical" }} value={form.buy}

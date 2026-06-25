@@ -585,6 +585,7 @@ export default function App() {
   const [showExport, setShowExport]   = useState(false);
   const [showImport, setShowImport]   = useState(false);
   const [sortOrder, setSortOrder]     = useState("desc"); // "asc" | "desc"
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // localStorage 로드
   useEffect(() => {
@@ -592,6 +593,13 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setEntries(JSON.parse(saved));
     } catch (_) {}
+  }, []);
+
+  // 스크롤 감지
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   function saveEntries(next) {
@@ -770,6 +778,17 @@ export default function App() {
         boxShadow:"0 4px 16px rgba(29,78,216,0.4)",
         display:"flex", alignItems:"center", justifyContent:"center", zIndex:50 }}>+</button>
 
+
+      {/* 맨 위로 버튼 */}
+      {showScrollTop && (
+        <button onClick={() => window.scrollTo({ top:0, behavior:"smooth" })} style={{
+          position:"fixed", bottom:90, right:16,
+          width:44, height:44, borderRadius:"50%",
+          background:"#fff", color:"#1D4ED8", border:"2px solid #1D4ED8",
+          fontSize:20, cursor:"pointer", zIndex:50,
+          boxShadow:"0 2px 10px rgba(0,0,0,0.15)",
+          display:"flex", alignItems:"center", justifyContent:"center" }}>↑</button>
+      )}
       {/* 모달 */}
       {showImport && <ImportModal currentEntries={entries} onImport={handleImport} onClose={() => setShowImport(false)} />}
       {showExport && <ExportModal entries={entries} onClose={() => setShowExport(false)} />}

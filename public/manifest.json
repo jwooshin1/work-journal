@@ -1,0 +1,19 @@
+{
+  "short_name": "업무일지",
+  "name": "팀 업무일지",
+  "description": "업무 통지를 자동 입력하고 팀과 공유하는 업무일지 앱",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1D4ED8",
+  "background_color": "#F1F5F9",
+  "lang": "ko"
+}

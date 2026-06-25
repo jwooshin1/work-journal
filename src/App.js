@@ -35,7 +35,7 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 
 /* ── 내보내기 유틸 ── */
 function exportToCSV(entries) {
-  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "메모", "마지막수정"];
+  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "작업내용", "마지막수정"];
   const rows = entries.map(e => [
     e.noticeId, e.category, e.date, e.time, e.creator,
     e.content, e.status, e.memo || "",
@@ -166,7 +166,7 @@ function ImportModal({ currentEntries, onImport, onClose }) {
           const lines = ev.target.result.replace(/^\uFEFF/, "").split("\n").filter(Boolean);
           const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, "").trim());
           const COL = { "통지번호":"noticeId","유형":"category","생성일":"date","생성시간":"time",
-            "생성자":"creator","통지내용":"content","상태":"status","메모":"memo" };
+            "생성자":"creator","통지내용":"content","상태":"status","작업내용":"memo" };
           parsed = lines.slice(1).map(line => {
             const vals = [];
             let cur = "", inQ = false;
@@ -418,7 +418,7 @@ function EntryModal({ entry, onSave, onClose }) {
             <>
               <textarea value={rawText}
                 onChange={e => { setRawText(e.target.value); setParseError(""); }}
-                placeholder={"예)\n[통지생성]\n통지번호 : 10033685\n통지생성일 : 2026/06/24\n통지생성시간 : 10:37:47\n통지생성자 : AA00 / 김대웅\n통지내용 : [수위탁] 솔벤트 설비 전원 환기팬 인터락 작업\n업무일지 : 작업 중"}
+                placeholder={"예)\n[통지생성]\n통지번호 : 10033685\n통지생성일 : 2026/06/24\n통지생성시간 : 10:37:47\n통지생성자 : AA00 / 아무개\n통지내용 : 솔벤트 설비 전원 환기팬 인터락 작업"}
                 style={{ ...field, minHeight:180, resize:"vertical", lineHeight:1.6 }} />
               {parseError && <p style={{ color:"#DC3545", fontSize:12, margin:0 }}>{parseError}</p>}
               <button onClick={handleParse} style={{ background:"#059669", color:"#fff", border:"none",
@@ -463,7 +463,7 @@ function EntryModal({ entry, onSave, onClose }) {
               </div>
               <div>
                 <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>통지내용</label>
-                <textarea style={{ ...field, marginTop:6, minHeight:80, resize:"vertical" }} value={form.content}
+                <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.content}
                   onChange={e => set("content", e.target.value)} placeholder="작업 내용을 입력하세요" />
               </div>
               <div>
@@ -481,13 +481,9 @@ function EntryModal({ entry, onSave, onClose }) {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>메모 (선택)</label>
-                <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.memo}
-                  onChange={e => set("memo", e.target.value)} placeholder="추가 메모를 입력하세요" />
-              </div>
-                    <div>
-                <label>제품구매 (선택)</label>
-                <textarea value={form.purchase} onChange={...} placeholder="구매 제품명, 수량, 비용 등" />
+                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>작업내용</label>
+                <textarea style={{ ...field, marginTop:6, minHeight:100, resize:"vertical" }} value={form.memo}
+                  onChange={e => set("memo", e.target.value)} placeholder="추가 작업내용를 입력하세요" />
               </div>
               <button onClick={handleSave} style={{ background:"#1D4ED8", color:"#fff", border:"none",
                 borderRadius:10, padding:"13px", fontSize:15, fontWeight:800, cursor:"pointer", marginTop:4 }}>
@@ -508,8 +504,7 @@ function DetailModal({ entry, onEdit, onDelete, onClose }) {
     ["생성일시", `${entry.date} ${entry.time}`],
     ["생성자", entry.creator],
     ["통지내용", entry.content],
-    ["메모", entry.memo],
-    ["제품구매", entry.purchase],
+    ["작업내용", entry.memo],
   ].filter(([, v]) => v);
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.45)",

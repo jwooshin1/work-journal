@@ -417,7 +417,7 @@ function EntryModal({ entry, onSave, onClose }) {
             <>
               <textarea value={rawText}
                 onChange={e => { setRawText(e.target.value); setParseError(""); }}
-                placeholder={"[통지생성]\n통지번호 : 10033685\n통지생성일 : 2026/06/24\n통지생성시간 : 10:37:47\n통지생성자 : AA00 / 김대웅\n통지내용 : [수위탁] 솔벤트 설비 전원 환기팬 인터락 작업\n업무일지 : 작업 중"}
+                placeholder={"예)\n[통지생성]\n통지번호 : 10033685\n통지생성일 : 2026/06/24\n통지생성시간 : 10:37:47\n통지생성자 : AA00 / 김대웅\n통지내용 : [수위탁] 솔벤트 설비 전원 환기팬 인터락 작업\n업무일지 : 작업 중"}
                 style={{ ...field, minHeight:180, resize:"vertical", lineHeight:1.6 }} />
               {parseError && <p style={{ color:"#DC3545", fontSize:12, margin:0 }}>{parseError}</p>}
               <button onClick={handleParse} style={{ background:"#059669", color:"#fff", border:"none",

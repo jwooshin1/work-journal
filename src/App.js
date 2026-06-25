@@ -133,6 +133,172 @@ function ExportModal({ entries, onClose }) {
   );
 }
 
+/* ── 가져오기 모달 ── */
+function ImportModal({ currentEntries, onImport, onClose }) {
+  const [mode, setMode] = useState("merge"); // merge | replace
+  const [preview, setPreview] = useState(null); // { entries, filename, error }
+  const fileRef = useRef(null);
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        let parsed = [];
+        if (ext === "json") {
+          const raw = JSON.parse(ev.target.result);
+          if (!Array.isArray(raw)) throw new Error("JSON 배열 형식이 아닙니다.");
+          parsed = raw.map(e => ({
+            id: e.id || genId(),
+            category: e.category || "기타",
+            noticeId: e.noticeId || "",
+            date: e.date || "",
+            time: e.time || "",
+            creator: e.creator || "",
+            content: e.content || "",
+            status: STATUS_COLORS[e.status] ? e.status : "작업 중",
+            memo: e.memo || "",
+            updatedAt: e.updatedAt || new Date().toISOString(),
+          }));
+        } else if (ext === "csv") {
+          const lines = ev.target.result.replace(/^\uFEFF/, "").split("\n").filter(Boolean);
+          const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, "").trim());
+          const COL = { "통지번호":"noticeId","유형":"category","생성일":"date","생성시간":"time",
+            "생성자":"creator","통지내용":"content","상태":"status","메모":"memo" };
+          parsed = lines.slice(1).map(line => {
+            const vals = [];
+            let cur = "", inQ = false;
+            for (const ch of line) {
+              if (ch === '"') { inQ = !inQ; }
+              else if (ch === "," && !inQ) { vals.push(cur); cur = ""; }
+              else cur += ch;
+            }
+            vals.push(cur);
+            const obj = { id: genId(), updatedAt: new Date().toISOString() };
+            headers.forEach((h, i) => { if (COL[h]) obj[COL[h]] = (vals[i]||"").replace(/^"|"$/g,""); });
+            if (!STATUS_COLORS[obj.status]) obj.status = "작업 중";
+            obj.category = obj.category || "기타";
+            return obj;
+          }).filter(e => e.noticeId || e.content);
+        } else {
+          throw new Error("JSON 또는 CSV 파일만 지원합니다.");
+        }
+        setPreview({ entries: parsed, filename: file.name, error: null });
+      } catch(err) {
+        setPreview({ entries: [], filename: file.name, error: err.message });
+      }
+    };
+    reader.readAsText(file, "utf-8");
+  }
+
+  function handleImport() {
+    if (!preview?.entries?.length) return;
+    let next;
+    if (mode === "replace") {
+      if (!window.confirm(`기존 ${currentEntries.length}건을 모두 지우고 ${preview.entries.length}건으로 교체합니다. 계속하시겠습니까?`)) return;
+      next = preview.entries;
+    } else {
+      const existingIds = new Set(currentEntries.map(e => e.id));
+      const newOnly = preview.entries.filter(e => !existingIds.has(e.id));
+      next = [...newOnly, ...currentEntries];
+    }
+    onImport(next);
+    onClose();
+  }
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.45)",
+      display:"flex", alignItems:"flex-end", justifyContent:"center",
+      zIndex:1000, backdropFilter:"blur(2px)" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background:"#fff", borderRadius:"20px 20px 0 0", width:"100%", maxWidth:480,
+        maxHeight:"90vh", overflow:"auto", padding:"0 0 36px" }}>
+        <div style={{ display:"flex", justifyContent:"center", padding:"12px 0 4px" }}>
+          <div style={{ width:36, height:4, borderRadius:9, background:"#D1D5DB" }} />
+        </div>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 20px 20px" }}>
+          <h2 style={{ margin:0, fontSize:18, fontWeight:800, color:"#111827" }}>📥 데이터 가져오기</h2>
+          <button onClick={onClose} style={{ background:"none", border:"none", fontSize:22, cursor:"pointer", color:"#6B7280" }}>×</button>
+        </div>
+
+        <div style={{ padding:"0 20px", display:"flex", flexDirection:"column", gap:18 }}>
+          {/* 파일 선택 */}
+          <div>
+            <p style={{ margin:"0 0 8px", fontSize:12, fontWeight:700, color:"#6B7280" }}>파일 선택 (JSON 또는 CSV)</p>
+            <div onClick={() => fileRef.current?.click()} style={{
+              border:"2px dashed #CBD5E1", borderRadius:12, padding:"24px 20px",
+              textAlign:"center", cursor:"pointer", background:"#F8FAFC",
+              transition:"border-color 0.2s" }}>
+              <div style={{ fontSize:32, marginBottom:8 }}>📂</div>
+              <p style={{ margin:0, fontSize:13, color:"#64748B", fontWeight:600 }}>
+                {preview ? preview.filename : "파일을 클릭해서 선택하세요"}
+              </p>
+              <p style={{ margin:"4px 0 0", fontSize:11, color:"#94A3B8" }}>JSON · CSV 지원</p>
+            </div>
+            <input ref={fileRef} type="file" accept=".json,.csv" onChange={handleFile}
+              style={{ display:"none" }} />
+          </div>
+
+          {/* 미리보기 */}
+          {preview && (
+            preview.error ? (
+              <div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:10, padding:"12px 14px" }}>
+                <p style={{ margin:0, fontSize:13, color:"#DC2626", fontWeight:700 }}>⚠ 파일 오류</p>
+                <p style={{ margin:"4px 0 0", fontSize:12, color:"#EF4444" }}>{preview.error}</p>
+              </div>
+            ) : (
+              <div style={{ background:"#F0FDF4", border:"1px solid #BBF7D0", borderRadius:10, padding:"12px 14px" }}>
+                <p style={{ margin:0, fontSize:13, color:"#15803D", fontWeight:700 }}>
+                  ✓ {preview.entries.length}건 인식됨
+                </p>
+                <p style={{ margin:"4px 0 0", fontSize:11, color:"#16A34A" }}>
+                  통지번호·내용이 있는 항목만 가져옵니다.
+                </p>
+              </div>
+            )
+          )}
+
+          {/* 가져오기 방식 */}
+          {preview && !preview.error && (
+            <div>
+              <p style={{ margin:"0 0 8px", fontSize:12, fontWeight:700, color:"#6B7280" }}>가져오기 방식</p>
+              {[
+                ["merge",   "병합", `기존 ${currentEntries.length}건 유지 + 새 항목 추가 (중복 ID 제외)`, "#EFF6FF", "#1D4ED8"],
+                ["replace", "교체", `기존 데이터를 모두 지우고 ${preview.entries.length}건으로 교체`, "#FFF7ED", "#EA580C"],
+              ].map(([val, label, desc, bg, color]) => (
+                <label key={val} onClick={() => setMode(val)} style={{
+                  display:"flex", alignItems:"flex-start", gap:10, padding:"12px",
+                  borderRadius:10, cursor:"pointer", marginBottom:6,
+                  border:`1.5px solid ${mode===val ? color : "#E5E7EB"}`,
+                  background: mode===val ? bg : "#F9FAFB" }}>
+                  <input type="radio" name="importMode" value={val} checked={mode===val}
+                    onChange={() => setMode(val)} style={{ accentColor:color, marginTop:2 }} />
+                  <div>
+                    <p style={{ margin:0, fontSize:14, fontWeight:700, color: mode===val ? color : "#374151" }}>{label}</p>
+                    <p style={{ margin:"2px 0 0", fontSize:11, color:"#6B7280" }}>{desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          <button onClick={handleImport}
+            disabled={!preview || !!preview.error || preview.entries.length === 0}
+            style={{ background: (!preview || preview.error) ? "#E5E7EB" : "#1D4ED8",
+              color: (!preview || preview.error) ? "#9CA3AF" : "#fff",
+              border:"none", borderRadius:10, padding:"14px",
+              fontSize:15, fontWeight:800, cursor: (!preview || preview.error) ? "default" : "pointer" }}>
+            {preview && !preview.error ? `⬆ ${preview.entries.length}건 가져오기` : "파일을 선택하세요"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 /* ── 배지 ── */
 function StatusBadge({ status }) {
   const c = STATUS_COLORS[status] || STATUS_COLORS["보류"];
@@ -410,6 +576,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState("전체");
   const [tab, setTab]                 = useState("list");
   const [showExport, setShowExport]   = useState(false);
+  const [showImport, setShowImport]   = useState(false);
 
   // localStorage 로드
   useEffect(() => {
@@ -428,6 +595,9 @@ export default function App() {
     const idx = entries.findIndex(e => e.id === entry.id);
     saveEntries(idx >= 0 ? entries.map(e => e.id === entry.id ? entry : e) : [entry, ...entries]);
     setModal(null);
+  }
+  function handleImport(next) {
+    saveEntries(next);
   }
   function handleDelete(id) {
     if (!window.confirm("이 업무일지를 삭제하시겠습니까?")) return;
@@ -462,6 +632,10 @@ export default function App() {
             <p style={{ margin:"2px 0 0", fontSize:12, opacity:0.7 }}>총 {entries.length}건 등록</p>
           </div>
           <div style={{ display:"flex", gap:6 }}>
+<button onClick={() => setShowImport(true)} style={{
+                background:"rgba(255,255,255,0.15)", border:"1.5px solid rgba(255,255,255,0.35)",
+                color:"#fff", borderRadius:10, padding:"8px 12px",
+                fontSize:13, fontWeight:700, cursor:"pointer" }}>📥 가져오기</button>
             {entries.length > 0 && (
               <button onClick={() => setShowExport(true)} style={{
                 background:"rgba(255,255,255,0.15)", border:"1.5px solid rgba(255,255,255,0.35)",
@@ -566,6 +740,7 @@ export default function App() {
         display:"flex", alignItems:"center", justifyContent:"center", zIndex:50 }}>+</button>
 
       {/* 모달 */}
+      {showImport && <ImportModal currentEntries={entries} onImport={handleImport} onClose={() => setShowImport(false)} />}
       {showExport && <ExportModal entries={entries} onClose={() => setShowExport(false)} />}
       {modal?.type==="add"    && <EntryModal entry={{}}          onSave={handleSave} onClose={() => setModal(null)} />}
       {modal?.type==="edit"   && <EntryModal entry={modal.entry} onSave={handleSave} onClose={() => setModal(null)} />}
@@ -578,3 +753,4 @@ export default function App() {
     </div>
   );
 }
+

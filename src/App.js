@@ -35,10 +35,10 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 
 /* ── 내보내기 유틸 ── */
 function exportToCSV(entries) {
-  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "작업내용", "마지막수정"];
+  const headers = ["통지번호", "유형", "생성일", "생성시간", "생성자", "통지내용", "상태", "작업내용", "제품구매", "마지막수정"];
   const rows = entries.map(e => [
     e.noticeId, e.category, e.date, e.time, e.creator,
-    e.content, e.status, e.memo || "",
+    e.content, e.status, e.memo, e.buy || "",
     e.updatedAt ? new Date(e.updatedAt).toLocaleString("ko-KR") : ""
   ].map(v => `"${String(v).replace(/"/g, '""')}"`));
   const csv = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
@@ -160,13 +160,14 @@ function ImportModal({ currentEntries, onImport, onClose }) {
             content: e.content || "",
             status: STATUS_COLORS[e.status] ? e.status : "작업 중",
             memo: e.memo || "",
+            buy: e.buy || "",
             updatedAt: e.updatedAt || new Date().toISOString(),
           }));
         } else if (ext === "csv") {
           const lines = ev.target.result.replace(/^\uFEFF/, "").split("\n").filter(Boolean);
           const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, "").trim());
           const COL = { "통지번호":"noticeId","유형":"category","생성일":"date","생성시간":"time",
-            "생성자":"creator","통지내용":"content","상태":"status","작업내용":"memo" };
+            "생성자":"creator","통지내용":"content","상태":"status","작업내용":"memo","제품구매":"buy" };
           parsed = lines.slice(1).map(line => {
             const vals = [];
             let cur = "", inQ = false;
@@ -352,6 +353,7 @@ function EntryModal({ entry, onSave, onClose }) {
     content:  entry.content  || "",
     status:   entry.status   || "작업 중",
     memo:     entry.memo     || "",
+    buy:     entry.buy       || "",
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -484,6 +486,11 @@ function EntryModal({ entry, onSave, onClose }) {
                 <textarea style={{ ...field, marginTop:6, minHeight:100, resize:"vertical" }} value={form.memo}
                   onChange={e => set("memo", e.target.value)} placeholder="추가 작업내용를 입력하세요" />
               </div>
+              <div>
+                <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>제품구매</label>
+                <textarea style={{ ...field, marginTop:6, minHeight:80, resize:"vertical" }} value={form.buy}
+                  onChange={e => set("buy", e.target.value)} placeholder="제조사 : / 사양 :" />
+              </div>
               <button onClick={handleSave} style={{ background:"#1D4ED8", color:"#fff", border:"none",
                 borderRadius:10, padding:"13px", fontSize:15, fontWeight:800, cursor:"pointer", marginTop:4 }}>
                 {isNew ? "업무 등록" : "수정 완료"}
@@ -504,6 +511,7 @@ function DetailModal({ entry, onEdit, onDelete, onClose }) {
     ["생성자", entry.creator],
     ["통지내용", entry.content],
     ["작업내용", entry.memo],
+    ["제품구매", entry.buy],
   ].filter(([, v]) => v);
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.45)",
@@ -608,7 +616,7 @@ export default function App() {
   const filtered = entries.filter(e => {
     const okStatus = filterStatus === "전체" || e.status === filterStatus;
     const q = search.toLowerCase();
-    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo,.some(v => v?.toLowerCase().includes(q));
+    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo, e.buy,.some(v => v?.toLowerCase().includes(q));
     return okStatus && okSearch;
   });
 

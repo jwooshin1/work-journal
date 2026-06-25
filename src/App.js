@@ -580,7 +580,7 @@ export default function App() {
   const [entries, setEntries]         = useState([]);
   const [modal, setModal]             = useState(null);
   const [search, setSearch]           = useState("");
-  const [filterStatus, setFilterStatus] = useState("전체");
+  const [filterStatus, setFilterStatus] = useState("작업 중");
   const [tab, setTab]                 = useState("list");
   const [showExport, setShowExport]   = useState(false);
   const [showImport, setShowImport]   = useState(false);

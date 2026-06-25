@@ -352,6 +352,7 @@ function EntryModal({ entry, onSave, onClose }) {
     content:  entry.content  || "",
     status:   entry.status   || "작업 중",
     memo:     entry.memo     || "",
+    purchase: entry.purchase || "",
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -484,6 +485,10 @@ function EntryModal({ entry, onSave, onClose }) {
                 <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.memo}
                   onChange={e => set("memo", e.target.value)} placeholder="추가 메모를 입력하세요" />
               </div>
+                    <div>
+                <label>제품구매 (선택)</label>
+                <textarea value={form.purchase} onChange={...} placeholder="구매 제품명, 수량, 비용 등" />
+              </div>
               <button onClick={handleSave} style={{ background:"#1D4ED8", color:"#fff", border:"none",
                 borderRadius:10, padding:"13px", fontSize:15, fontWeight:800, cursor:"pointer", marginTop:4 }}>
                 {isNew ? "업무 등록" : "수정 완료"}
@@ -504,6 +509,7 @@ function DetailModal({ entry, onEdit, onDelete, onClose }) {
     ["생성자", entry.creator],
     ["통지내용", entry.content],
     ["메모", entry.memo],
+    ["제품구매", entry.purchase],
   ].filter(([, v]) => v);
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.45)",
@@ -608,7 +614,7 @@ export default function App() {
   const filtered = entries.filter(e => {
     const okStatus = filterStatus === "전체" || e.status === filterStatus;
     const q = search.toLowerCase();
-    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo].some(v => v?.toLowerCase().includes(q));
+    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo,e.purchase].some(v => v?.toLowerCase().includes(q));
     return okStatus && okSearch;
   });
 

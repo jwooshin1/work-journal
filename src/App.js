@@ -584,6 +584,7 @@ export default function App() {
   const [tab, setTab]                 = useState("list");
   const [showExport, setShowExport]   = useState(false);
   const [showImport, setShowImport]   = useState(false);
+  const [sortOrder, setSortOrder]     = useState("desc"); // "asc" | "desc"
 
   // localStorage 로드
   useEffect(() => {
@@ -612,12 +613,18 @@ export default function App() {
     setModal(null);
   }
 
-  const filtered = entries.filter(e => {
-    const okStatus = filterStatus === "전체" || e.status === filterStatus;
-    const q = search.toLowerCase();
-    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo, e.purchase].some(v => v?.toLowerCase().includes(q));
-    return okStatus && okSearch;
-  });
+  const filtered = entries
+    .filter(e => {
+      const okStatus = filterStatus === "전체" || e.status === filterStatus;
+      const q = search.toLowerCase();
+      const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo, e.purchase].some(v => v?.toLowerCase().includes(q));
+      return okStatus && okSearch;
+    })
+    .sort((a, b) => {
+      const da = (a.date || "").replace(/\//g, "-") + " " + (a.time || "");
+      const db = (b.date || "").replace(/\//g, "-") + " " + (b.time || "");
+      return sortOrder === "asc" ? da.localeCompare(db) : db.localeCompare(da);
+    });
 
   const statusCounts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = entries.filter(e => e.status === s).length; return acc;
@@ -687,6 +694,23 @@ export default function App() {
                   {s} ({s==="전체" ? entries.length : statusCounts[s]||0})
                 </button>
               ))}
+            </div>
+            {/* 정렬 */}
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span style={{ fontSize:11, fontWeight:700, color:"#9CA3AF", flexShrink:0 }}>기간</span>
+              <div style={{ display:"flex", background:"#fff", borderRadius:8,
+                boxShadow:"0 1px 3px rgba(0,0,0,0.08)", overflow:"hidden" }}>
+                {[["asc","⬆ 오름차순"],["desc","⬇ 내림차순"]].map(([val, label]) => (
+                  <button key={val} onClick={() => setSortOrder(val)} style={{
+                    padding:"6px 13px", fontSize:12, fontWeight:700, cursor:"pointer", border:"none",
+                    background: sortOrder===val ? "#1D4ED8" : "transparent",
+                    color: sortOrder===val ? "#fff" : "#6B7280",
+                    transition:"background 0.15s" }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <span style={{ fontSize:11, color:"#9CA3AF" }}>{filtered.length}건</span>
             </div>
           </div>
           <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"12px 16px 100px", gap:10 }}>

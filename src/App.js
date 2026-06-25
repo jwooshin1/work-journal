@@ -352,7 +352,6 @@ function EntryModal({ entry, onSave, onClose }) {
     content:  entry.content  || "",
     status:   entry.status   || "작업 중",
     memo:     entry.memo     || "",
-    purchase: entry.purchase || "",
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -609,7 +608,7 @@ export default function App() {
   const filtered = entries.filter(e => {
     const okStatus = filterStatus === "전체" || e.status === filterStatus;
     const q = search.toLowerCase();
-    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo,e.purchase].some(v => v?.toLowerCase().includes(q));
+    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo,.some(v => v?.toLowerCase().includes(q));
     return okStatus && okSearch;
   });
 

@@ -463,7 +463,7 @@ function EntryModal({ entry, onSave, onClose }) {
               </div>
               <div>
                 <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>통지내용</label>
-                <textarea style={{ ...field, marginTop:6, minHeight:80, resize:"vertical" }} value={form.content}
+                <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.content}
                   onChange={e => set("content", e.target.value)} placeholder="작업 내용을 입력하세요" />
               </div>
               <div>
@@ -482,12 +482,12 @@ function EntryModal({ entry, onSave, onClose }) {
               </div>
               <div>
                 <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>작업내용</label>
-                <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.memo}
+                <textarea style={{ ...field, marginTop:6, minHeight:120, resize:"vertical" }} value={form.memo}
                   onChange={e => set("memo", e.target.value)} placeholder="추가 작업내용을 입력하세요" />
               </div>
               <div>
                 <label style={{ fontSize:12, fontWeight:700, color:"#6B7280" }}>제품구매</label>
-                <textarea style={{ ...field, marginTop:6, minHeight:60, resize:"vertical" }} value={form.purchase}
+                <textarea style={{ ...field, marginTop:6, minHeight:80, resize:"vertical" }} value={form.purchase}
                   onChange={e => set("purchase", e.target.value)} placeholder="구매 제품명, 수량, 비용 등을 입력하세요" />
               </div>
               <button onClick={handleSave} style={{ background:"#1D4ED8", color:"#fff", border:"none",

@@ -533,7 +533,7 @@ function DetailModal({ entry, onEdit, onDelete, onClose }) {
           {rows.map(([label, val]) => (
             <div key={label} style={{ borderBottom:"1px solid #F3F4F6", padding:"12px 0" }}>
               <p style={{ margin:"0 0 3px", fontSize:11, fontWeight:700, color:"#9CA3AF" }}>{label}</p>
-              <p style={{ margin:0, fontSize:14, color:"#111827", lineHeight:1.5 }}>{val}</p>
+              <p style={{ margin:0, fontSize:14, color:"#111827", lineHeight:1.5, whiteSpace:"pre-wrap" }}>{val}</p>
             </div>
           ))}
           {entry.updatedAt && (
@@ -566,7 +566,7 @@ function EntryCard({ entry, onClick }) {
         </div>
         <StatusBadge status={entry.status} />
       </div>
-      <p style={{ margin:0, fontSize:14, fontWeight:700, color:"#111827", lineHeight:1.5 }}>{entry.content}</p>
+      <p style={{ margin:0, fontSize:14, fontWeight:700, color:"#111827", lineHeight:1.5, whiteSpace:"pre-wrap" }}>{entry.content}</p>
       <div style={{ display:"flex", justifyContent:"space-between" }}>
         <span style={{ fontSize:11, color:"#9CA3AF" }}>{entry.date} {entry.time}</span>
         <span style={{ fontSize:11, color:"#6B7280", fontWeight:600 }}>{entry.creator}</span>

@@ -608,7 +608,7 @@ export default function App() {
   const filtered = entries.filter(e => {
     const okStatus = filterStatus === "전체" || e.status === filterStatus;
     const q = search.toLowerCase();
-    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category].some(v => v?.toLowerCase().includes(q));
+    const okSearch = !q || [e.noticeId, e.content, e.creator, e.category, e.memo].some(v => v?.toLowerCase().includes(q));
     return okStatus && okSearch;
   });
 
